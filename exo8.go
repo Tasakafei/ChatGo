@@ -1,7 +1,7 @@
 package main
 
 /**
-  SUJET : CRIBLE D'ÉRATOSTHÈNE
+  SUJET : Chat en Go
   AUTEUR : Alexandre Cazala
 **/
 
@@ -116,7 +116,6 @@ type PseudoSocket struct {
 
 type ChatRoom struct {
 	clients map[string]*Client
-	//joins chan net.Conn
 	fromClients chan Message
 	fromServer chan PseudoSocket
 }

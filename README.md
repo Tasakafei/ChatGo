@@ -23,10 +23,57 @@ type ChatRoom struct {
 	fromClients chan Message
 	fromServer chan PseudoSocket
 }
-`
+```
 
-Nos utilisateurs sont regroupés dans des chatRooms. Ainsi à l'avenir nous pourrions rajouter des propriétés propres aux chatRooms telles qu'un nombre d'utilisateurs max ou des permissions spéciales (exemple, tout ceux qui s'appellent GéantVert pourraient avoir accès à des commandes spéciales).
+Nos utilisateurs sont regroupés dans des chatRooms. Ces clients sont identifiés par un pseudo dans une hashmap, ce pseudo doit donc être unique. Ainsi à l'avenir nous pourrions rajouter des propriétés propres aux chatRooms telles qu'un nombre d'utilisateurs max ou des permissions spéciales (exemple, tout ceux qui s'appellent GéantVert pourraient avoir accès à des commandes spéciales).
 
+Une chatRoom a deux canaux. Le premier **fromClients** est celui où arrive les messages de nos clients. Le deuxième, **fromServer** est celui où les messages du serveur mère arrive (exemple, nouvel utilisateur à rajouter au salon et à l'avenir potentiellement d'autres messages tels que des "Redémarrage prévu dans deux minutes".
+
+
+Une chat room a un constructeur **ChatRoomConstructor** mais aussi plusieurs méthodes dont leur nom définissent leur objectif :
+1. **Join** : permet de créer un nouvel utilisateur (la structure de données) et de le rajouter au salon. Cette méthode est appelée par le connectionHandler qui a déjà recueillie le nom du visiteur.
+2. **Broadcast** : Broadcast un message à tout les utilisateurs du salon sauf celui qui l'a envoyé.
+3. **HandleMessage** : Permet de factoriser le traitement des messages, si c'est un message de déconnection on débranche l'utilisateur de la map et on ferme sa socket. Sinon on broadcast le message. 
+4. **Disconnect** : Permet de déconnecter un client et de prévenir tout le monde.
+5. **Listen** : permet de mettre le serveur sur écoute des messages du client et des messages du serveur.
+
+### Client
+```go
+type Client struct {
+	toHub chan Message
+	fromHub chan Message
+	pseudo string
+	reader *bufio.Reader
+	writer *bufio.Writer
+	socket net.Conn
+}
+```
+ 
+Un client est une modélisation du client réel. Cette structure permet de garder plusieurs méthodes effectuable sur un client ainsi que de transporter des attributs. **toHub** est le canal pour envoyer des messages à la **ChatRoom** dans laquelle le client se trouve (un client ne peut être que dans une seule chatRoom). **fromHub** est le canal de réception des messages venant de la ChatRoom. **Pseudo** est le pseudo de l'utilisateur. reader est le moyen d'écriture du client (chaque client peut avoir sa propre interface qui difère à l'avenir). socket est la socket du client (pour nous permettre de la fermer plus facilement).
+
+Un client a aussi des méthodes et un constructeur :
+1. **Read** : c'est une go routine qui lira l'input de l'utilsateur physique pour formater un message et l'envoyer à la chatRoom. Nous continuerons ce process infiniment tant que la socket est ouverte.
+2. **Write** : go routine pour écrire chez l'utilisateur
+3. **Listen** : permettra de mettre le client virtuel sous écoute du client physique (lance simplement les deux go routines read et write).
+
+### Message
+```go
+type Message struct {
+  message_type string
+  pseudo string
+  content string
+}
+```
+C'est le message qui transite entre le client virtuel et la chatRoom.
+
+### PseudoSocket
+```go
+type PseudoSocket struct {
+	pseudo string
+	socket net.Conn
+}
+```
+Ce message est celui envoyé du connectionHandler vers la chatRoom pour demander de rajouter un utilisateur.
 
 ## Architecture proposée
 Pour vous décrire l'architecture mise en place dans les moindres détails j'ai préféré la dérouler sous forme de scénario étant donné qu'il est compliqué de faire apparaître comme demandé à la fois les goroutines, les canaux de communication entre les goroutines, à quel moment un nouveau module ou go routine est instanciée et par qui etc. 

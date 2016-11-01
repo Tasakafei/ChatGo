@@ -76,6 +76,6 @@ type PseudoSocket struct {
 Ce message est celui envoyé du connectionHandler vers la chatRoom pour demander de rajouter un utilisateur.
 
 ## Architecture proposée
-Pour vous décrire l'architecture mise en place dans les moindres détails j'ai préféré la dérouler sous forme de scénario étant donné qu'il est compliqué de faire apparaître comme demandé à la fois les goroutines, les canaux de communication entre les goroutines, à quel moment un nouveau module ou go routine est instanciée et par qui etc. 
+De façon synthétisée, voici notre architecture. Le rapport écrit décrit mieux les structures. Le code est compréhensible puisque découpées en méthodes avec des fonctions "raisonnée", de la valeur métier.
 
-Du coup nous avons une première étape qui est la connection. La figure 1 détaille cette étape. Au préalable nous avons un serveur qui instancie une `ChatRoom` et lui passe en paramètre un canal de communication `ServerToChatRoomChannel`. Ce serveur écoute sur le port 1234. Un client arrive et se connecte via netcat (par exemple) sur le serveur. Le serveur va ensuite instancié une nouvelle go routine est dédiée à la gestion des utilisateurs : `handleConnection`. Nous lui passons aussi en paramètres la socket de connection (pour qu'il puisse communiquer avec le client et un canal de communication `ServerToChatRoomChannel`. Ce canal de communication était utilisé plus tôt 
+![Image : image_generale.png | Erreur, l'image ne se charge pas, allez voir dans le dossier ressource]("./Images/image_generale.png")

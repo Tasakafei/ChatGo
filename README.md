@@ -78,4 +78,4 @@ Ce message est celui envoyé du connectionHandler vers la chatRoom pour demander
 ## Architecture proposée
 De façon synthétisée, voici notre architecture. Le rapport écrit décrit mieux les structures. Le code est compréhensible puisque découpées en méthodes avec des fonctions "raisonnée", de la valeur métier.
 
-![Image : image_generale.png | Erreur, l'image ne se charge pas, allez voir dans le dossier ressource]("./Images/image_generale.png")
+![Image : image_generale.png | Erreur, l'image ne se charge pas, allez voir dans le dossier ressource](Images/image_generale.png)
